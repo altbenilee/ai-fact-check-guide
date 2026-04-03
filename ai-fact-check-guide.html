@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Fact-Check What AI Tells You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=Nunito:ital,wght@0,400;0,600;0,700;1,600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #2d2d3a;
+    --ink-muted: #636378;
+    --ink-faint: #9f9fb5;
+    --paper: #f7f7fc;
+    --paper-warm: #eeeef8;
+    --paper-mid: #e0e0f0;
+    --surface: #ffffff;
+
+    --accent: #5b5bd6;
+    --accent-light: #ebebff;
+    --accent-mid: #7b7be8;
+    --accent-hover: #4747c2;
+
+    --good: #1a9e6e;
+    --good-light: #e3f8f0;
+    --good-border: rgba(26,158,110,0.22);
+
+    --warn: #c0440e;
+    --warn-light: #fef0ea;
+    --warn-border: rgba(192,68,14,0.2);
+
+    --amber: #b07410;
+    --amber-light: #fef8e7;
+    --amber-border: rgba(176,116,16,0.2);
+
+    --border: rgba(45,45,58,0.1);
+    --border-strong: rgba(45,45,58,0.18);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    font-size: 16px;
+    min-height: 100vh;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: #3b3b8f;
+    color: #fff;
+    padding: 5rem 2rem 4.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse at 15% 85%, rgba(255,180,140,0.18) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 15%, rgba(140,180,255,0.16) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.04) 0%, transparent 70%);
+  }
+
+  .hero-inner { position: relative; max-width: 680px; margin: 0 auto; }
+
+  .hero-eyebrow {
+    display: inline-block;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #c8c8ff;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(200,200,255,0.3);
+    border-radius: 20px;
+    padding: 5px 14px;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.25;
+    color: #fff;
+    margin-bottom: 1.25rem;
+    font-weight: 700;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: #ffc9a0;
+  }
+
+  .hero-sub {
+    font-size: 15px;
+    color: rgba(255,255,255,0.68);
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+    font-weight: 400;
+    line-height: 1.75;
+  }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    font-size: 12px;
+    color: rgba(255,255,255,0.42);
+    flex-wrap: wrap;
+  }
+
+  /* ── Layout ── */
+  .container { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
+
+  /* ── Progress nav ── */
+  .progress-nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0.75rem 1.5rem;
+  }
+
+  .progress-nav-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .nav-label { font-size: 11px; color: var(--ink-faint); font-weight: 600; letter-spacing: 0.05em; white-space: nowrap; }
+
+  .progress-dots { display: flex; gap: 6px; flex: 1; }
+
+  .prog-dot {
+    height: 4px;
+    flex: 1;
+    border-radius: 4px;
+    background: var(--paper-mid);
+    transition: background 0.4s ease;
+    cursor: pointer;
+  }
+
+  .prog-dot.done { background: var(--accent); }
+
+  .nav-count { font-size: 11px; color: var(--ink-faint); white-space: nowrap; font-weight: 600; }
+
+  /* ── Steps ── */
+  .steps-section { padding: 2.5rem 0 2rem; }
+
+  .step {
+    margin-bottom: 0.875rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .step:hover { border-color: var(--border-strong); }
+  .step.open { border-color: var(--accent); box-shadow: 0 4px 20px rgba(91,91,214,0.1); }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .step-num {
+    min-width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--paper-warm);
+    border: 1.5px solid var(--paper-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink-muted);
+    transition: background 0.3s, color 0.3s, border-color 0.3s;
+    flex-shrink: 0;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .step.open .step-num {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .step-title-group { flex: 1; min-width: 0; }
+
+  .step-title {
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.4;
+    margin-bottom: 2px;
+  }
+
+  .step-subtitle {
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-weight: 400;
+  }
+
+  .step-arrow {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--ink-faint);
+    transition: transform 0.3s ease, color 0.3s ease;
+  }
+
+  .step.open .step-arrow { transform: rotate(180deg); color: var(--accent); }
+
+  .step-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.45s ease;
+  }
+
+  .step.open .step-body { max-height: 1200px; }
+
+  .step-body-inner {
+    padding: 1.25rem 1.5rem 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .step-body-inner p {
+    font-size: 14.5px;
+    color: var(--ink-muted);
+    line-height: 1.75;
+    margin-bottom: 1rem;
+  }
+
+  .step-body-inner p:last-child { margin-bottom: 0; }
+
+  /* ── Example boxes ── */
+  .example-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1.25rem 0; }
+
+  @media (max-width: 560px) { .example-pair { grid-template-columns: 1fr; } }
+
+  .example-box {
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.1rem;
+  }
+
+  .example-box.bad { background: var(--warn-light); border: 1.5px solid var(--warn-border); }
+  .example-box.good { background: var(--good-light); border: 1.5px solid var(--good-border); }
+
+  .example-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+
+  .example-box.bad .example-label { color: var(--warn); }
+  .example-box.good .example-label { color: var(--good); }
+
+  .example-box p {
+    font-size: 13px !important;
+    line-height: 1.65 !important;
+    margin: 0 !important;
+  }
+
+  .example-box.bad p { color: #7a2e0a !important; }
+  .example-box.good p { color: #0f6345 !important; }
+
+  /* ── Signal grid ── */
+  .signal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+    margin: 1rem 0;
+  }
+
+  .signal-item {
+    background: var(--paper-warm);
+    border: 1px solid var(--paper-mid);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--ink-muted);
+    line-height: 1.55;
+  }
+
+  .signal-item strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+
+  /* ── Stakes grid ── */
+  .stakes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 1rem 0; }
+
+  @media (max-width: 560px) { .stakes-grid { grid-template-columns: 1fr; } }
+
+  .stake-card {
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    border: 1.5px solid var(--border);
+  }
+
+  .stake-card.low { background: var(--good-light); border-color: var(--good-border); }
+  .stake-card.med { background: var(--amber-light); border-color: var(--amber-border); }
+  .stake-card.high { background: var(--warn-light); border-color: var(--warn-border); }
+
+  .stake-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .stake-card.low .stake-label { color: var(--good); }
+  .stake-card.med .stake-label { color: var(--amber); }
+  .stake-card.high .stake-label { color: var(--warn); }
+
+  .stake-card p { font-size: 13px !important; line-height: 1.6 !important; color: var(--ink-muted) !important; margin: 0 !important; }
+
+  /* ── Pills ── */
+  .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 1rem 0; }
+
+  .pill {
+    display: inline-block;
+    background: var(--accent-light);
+    border: 1px solid rgba(91,91,214,0.2);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent-hover);
+    padding: 4px 12px;
+  }
+
+  /* ── Callout ── */
+  .callout {
+    background: var(--accent-light);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 1rem 1.1rem;
+    margin: 1rem 0;
+    font-size: 14px;
+    color: #3a3a8a;
+    line-height: 1.7;
+    font-weight: 500;
+  }
+
+  /* ── Footer CTA ── */
+  .footer-cta {
+    background: #3b3b8f;
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin: 2rem 0 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-cta-text h3 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .footer-cta-text p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.58);
+    margin: 0;
+    max-width: 380px;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    background: #ffc9a0;
+    color: #5c2800;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s ease;
+    border: none;
+    cursor: pointer;
+  }
+
+  .cta-btn:hover { background: #ffd8bc; }
+
+  /* ── Site footer ── */
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem;
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+
+  /* ── References ── */
+  .references-section { padding: 0 0 3rem; }
+
+  .references-box {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .references-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.5rem;
+    cursor: pointer;
+    user-select: none;
+    gap: 1rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .references-header:hover { background: var(--paper-warm); }
+
+  .ref-title-group { display: flex; flex-direction: column; gap: 2px; }
+
+  .ref-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .ref-subtitle {
+    font-size: 12px;
+    color: var(--ink-faint);
+    font-weight: 400;
+  }
+
+  .ref-arrow {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--ink-faint);
+    transition: transform 0.3s ease;
+  }
+
+  .ref-arrow.open { transform: rotate(180deg); }
+
+  .ref-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.45s ease;
+  }
+
+  .ref-body.open { max-height: 3000px; }
+
+  .ref-body-inner {
+    padding: 1.25rem 1.5rem 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .ref-intro {
+    font-size: 13.5px;
+    color: var(--ink-muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.7;
+  }
+
+  .ref-group { margin-bottom: 1.5rem; }
+  .ref-group:last-child { margin-bottom: 0; }
+
+  .ref-group-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .ref-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .ref-item:last-child { margin-bottom: 0; }
+
+  .ref-num {
+    min-width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--paper-warm);
+    border: 1px solid var(--paper-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ink-muted);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .ref-content {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    line-height: 1.65;
+  }
+
+  .ref-content em { font-style: italic; color: var(--ink); }
+
+  .ref-link {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 11px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .ref-link:hover { text-decoration: underline; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .step { animation: fadeUp 0.4s ease both; }
+  .step:nth-child(1) { animation-delay: 0.05s; }
+  .step:nth-child(2) { animation-delay: 0.1s; }
+  .step:nth-child(3) { animation-delay: 0.15s; }
+  .step:nth-child(4) { animation-delay: 0.2s; }
+  .step:nth-child(5) { animation-delay: 0.25s; }
+  .step:nth-child(6) { animation-delay: 0.3s; }
+
+  .hero-inner > * { animation: fadeUp 0.6s ease both; }
+  .hero-eyebrow { animation-delay: 0.1s; }
+  .hero h1 { animation-delay: 0.2s; }
+  .hero-sub { animation-delay: 0.3s; }
+  .hero-meta { animation-delay: 0.4s; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">An interactive guide</div>
+    <h1>How to fact-check<br><em>what AI tells you</em></h1>
+    <p class="hero-sub">AI tools are genuinely useful, but they also make things up with complete confidence. This guide will help you use them wisely without getting burned.</p>
+    <div class="hero-meta">
+      <span>6 steps</span>
+      <span>·</span>
+      <span>~5 min read</span>
+      <span>·</span>
+      <span>For all experience levels</span>
+    </div>
+  </div>
+</header>
+
+<nav class="progress-nav">
+  <div class="progress-nav-inner">
+    <span class="nav-label">Progress</span>
+    <div class="progress-dots" id="progressDots"></div>
+    <span class="nav-count" id="navCount">0 / 6</span>
+  </div>
+</nav>
+
+<main>
+  <section class="steps-section">
+    <div class="container" id="stepsContainer">
+
+      <!-- Step 1 -->
+      <div class="step" data-step="0">
+        <div class="step-header">
+          <div class="step-num">1</div>
+          <div class="step-title-group">
+            <div class="step-title">Understand why AI makes things up</div>
+            <div class="step-subtitle">It's not lying. It's predicting.</div>
+          </div>
+          <svg class="step-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M5 7.5l5 5 5-5"/>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-body-inner">
+            <p>AI language models don't retrieve facts from a database. They predict the most statistically likely next word based on patterns from their training data, which means they can produce text that sounds authoritative and specific while being entirely fabricated. The technical term for this is "hallucination," but the practical effect is the same: a confident-sounding answer with nothing behind it.</p>
+            <div class="example-pair">
+              <div class="example-box bad">
+                <div class="example-label">AI output — looks credible, but fabricated</div>
+                <p>"According to a 2022 JAMA study by Dr. Elena Soto et al., patients receiving drug X showed a 34% reduction in symptom severity over 12 weeks."</p>
+              </div>
+              <div class="example-box good">
+                <div class="example-label">What's actually going on</div>
+                <p>That study may not exist at all. The author name, journal, year, and statistic can all be invented and presented with complete confidence. A search on PubMed would turn up nothing.</p>
+              </div>
+            </div>
+            <div class="callout">Worth remembering: the more specific a claim sounds — names, dates, statistics, citations — the more carefully it's worth checking.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step" data-step="1">
+        <div class="step-header">
+          <div class="step-num">2</div>
+          <div class="step-title-group">
+            <div class="step-title">Know which claims need verification</div>
+            <div class="step-subtitle">Not everything AI says requires a fact-check</div>
+          </div>
+          <svg class="step-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M5 7.5l5 5 5-5"/>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-body-inner">
+            <p>You don't need to fact-check everything AI produces — that would defeat the purpose. A more practical approach is to focus your energy on the types of claims that are genuinely likely to be wrong:</p>
+            <div class="signal-grid">
+              <div class="signal-item"><strong>Statistics and numbers</strong>Percentages, study results, market figures — specific enough to sound real, easy to fabricate</div>
+              <div class="signal-item"><strong>Named citations</strong>Author names, journal titles, publication dates — these are often partially or fully invented</div>
+              <div class="signal-item"><strong>Recent events</strong>AI has a knowledge cutoff date and genuinely doesn't know what happened after it</div>
+              <div class="signal-item"><strong>Legal or regulatory claims</strong>Drug approvals, laws, clinical guidelines — the stakes are high if something is off</div>
+              <div class="signal-item"><strong>Quotes attributed to real people</strong>AI will confidently put words in real people's mouths</div>
+              <div class="signal-item"><strong>Niche or technical details</strong>The less common the topic, the more likely the model is filling in gaps</div>
+            </div>
+            <p style="margin-top:0.75rem;">On the lower-risk end: general explanations of well-known concepts, summaries of broadly documented events, and things that are just common knowledge.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step" data-step="2">
+        <div class="step-header">
+          <div class="step-num">3</div>
+          <div class="step-title-group">
+            <div class="step-title">Ask AI to show its work</div>
+            <div class="step-subtitle">A better prompt can surface uncertainty before you go looking for it</div>
+          </div>
+          <svg class="step-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M5 7.5l5 5 5-5"/>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-body-inner">
+            <p>Before you go off searching for sources, try asking the AI to back up what it said. It won't catch every error, but it can quickly reveal whether the model has any real grounding for a claim or is simply filling space.</p>
+            <div class="example-pair">
+              <div class="example-box bad">
+                <div class="example-label">Vague prompt — opens the door to fabrication</div>
+                <p>"What are the statistics on remote work productivity?"</p>
+              </div>
+              <div class="example-box good">
+                <div class="example-label">More specific prompt — invites honesty</div>
+                <p>"What are the statistics on remote work productivity? For each statistic you mention, tell me the source and year. If you're not confident in a specific number, say so."</p>
+              </div>
+            </div>
+            <p>When asked to cite its sources, a good AI will often acknowledge uncertainty directly: "I'm not confident in that figure" or "I don't have a reliable source for this." That kind of hedging is actually useful information. What you want to watch out for is the opposite: a very specific citation delivered with total confidence, which is usually a sign something needs to be verified.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step" data-step="3">
+        <div class="step-header">
+          <div class="step-num">4</div>
+          <div class="step-title-group">
+            <div class="step-title">Verify with primary sources</div>
+            <div class="step-subtitle">Go to the original source. Another AI won't help here.</div>
+          </div>
+          <svg class="step-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M5 7.5l5 5 5-5"/>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-body-inner">
+            <p>When something needs verifying, go straight to a primary source. One trap people fall into is asking a different AI tool to check the first one. That doesn't work — both models draw from similar training data and can produce the same fabricated result.</p>
+            <p>A few reliable places to look, depending on what you're checking:</p>
+            <div class="pill-row">
+              <span class="pill">Medical / clinical → PubMed</span>
+              <span class="pill">Clinical trials → ClinicalTrials.gov</span>
+              <span class="pill">Drug approvals → FDA.gov</span>
+              <span class="pill">Health statistics → CDC, WHO, NIH</span>
+              <span class="pill">Scientific papers → Google Scholar</span>
+              <span class="pill">Breaking news → Reuters, AP News</span>
+              <span class="pill">Legal & regulatory → .gov sites</span>
+            </div>
+            <div class="example-pair" style="margin-top:1rem;">
+              <div class="example-box bad">
+                <div class="example-label">What not to do</div>
+                <p>Paste an AI-generated citation into ChatGPT or Perplexity and ask if it's real. There's a good chance the second AI will simply confirm what the first one made up.</p>
+              </div>
+              <div class="example-box good">
+                <div class="example-label">What actually works</div>
+                <p>Copy the citation directly into PubMed or Google Scholar and search for the paper. If nothing comes up, the AI invented it.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step" data-step="4">
+        <div class="step-header">
+          <div class="step-num">5</div>
+          <div class="step-title-group">
+            <div class="step-title">Watch for confident-sounding vagueness</div>
+            <div class="step-subtitle">Sounding confident and being accurate are two different things</div>
+          </div>
+          <svg class="step-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M5 7.5l5 5 5-5"/>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-body-inner">
+            <p>Because AI is trained to produce fluent, coherent text, it sounds confident even when it's wrong. One of the trickier patterns to catch is what you might call "confident hedging" — language that reads as measured and thoughtful while actually offering no evidence at all.</p>
+            <div class="example-pair">
+              <div class="example-box bad">
+                <div class="example-label">Sounds balanced — but has no grounding</div>
+                <p>"While exact figures vary by source, most research suggests that approximately 60–70% of patients with this condition experience symptom improvement within 6 months."</p>
+              </div>
+              <div class="example-box good">
+                <div class="example-label">What those phrases are really signaling</div>
+                <p>Phrases like "most research suggests," "studies generally show," and "it is widely accepted" aren't citations. They're placeholders. Treat them as a prompt to dig deeper, not as reassurance.</p>
+              </div>
+            </div>
+            <div class="callout">When something reads as perfectly reasonable and you feel inclined to just trust it — that's a good moment to pause. Plausibility isn't the same as accuracy, and AI output tends to be very good at sounding plausible.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="step" data-step="5">
+        <div class="step-header">
+          <div class="step-num">6</div>
+          <div class="step-title-group">
+            <div class="step-title">Build a personal verification habit</div>
+            <div class="step-subtitle">A simple way to decide how much checking is enough</div>
+          </div>
+          <svg class="step-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M5 7.5l5 5 5-5"/>
+          </svg>
+        </div>
+        <div class="step-body">
+          <div class="step-body-inner">
+            <p>Realistically, the level of scrutiny you apply should match what's at stake. Here's a rough framework that's easy to keep in mind:</p>
+            <div class="stakes-grid">
+              <div class="stake-card low">
+                <div class="stake-label">Low stakes</div>
+                <p>Brainstorming, drafting, organizing your own thinking — a quick read-through is probably fine</p>
+              </div>
+              <div class="stake-card med">
+                <div class="stake-label">Medium stakes</div>
+                <p>Anything going to a team or being shared more broadly — check statistics and citations before it goes out</p>
+              </div>
+              <div class="stake-card high">
+                <div class="stake-label">High stakes</div>
+                <p>Patient care, legal, regulatory, or public-facing work — every factual claim should be traced back to a primary source</p>
+              </div>
+            </div>
+            <div class="callout">A frame that tends to stick: think of AI output like a first draft from a smart, well-read colleague who sometimes misremembers their sources. You'd still read it carefully before putting your name on it.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer CTA -->
+      <div class="footer-cta">
+        <div class="footer-cta-text">
+          <h3>Try it with a real example</h3>
+          <p>Open Claude and paste in any AI-generated text. Ask: "Which claims here should I verify, and where would I look?"</p>
+        </div>
+        <a class="cta-btn" href="https://claude.ai" target="_blank" rel="noopener">Try it on Claude.ai →</a>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="references-section">
+    <div class="container">
+      <div class="references-box">
+        <div class="references-header" onclick="toggleRefs()">
+          <div class="ref-title-group">
+            <span class="ref-title">Sources & further reading</span>
+            <span class="ref-subtitle">Research supporting the claims in this guide</span>
+          </div>
+          <svg class="ref-arrow" id="refArrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M5 7.5l5 5 5-5"/>
+          </svg>
+        </div>
+        <div class="ref-body" id="refBody">
+          <div class="ref-body-inner">
+            <p class="ref-intro">The claims in this guide are grounded in published research and primary sources. Full citations are listed below.</p>
+
+            <div class="ref-group">
+              <div class="ref-group-label">How LLMs work: next-token prediction</div>
+              <div class="ref-item">
+                <span class="ref-num">1</span>
+                <div class="ref-content">
+                  Center for Security and Emerging Technology (CSET). <em>The Surprising Power of Next Word Prediction: Large Language Models Explained.</em> Georgetown University, 2025.
+                  <a href="https://cset.georgetown.edu/article/the-surprising-power-of-next-word-prediction-large-language-models-explained-part-1/" target="_blank" rel="noopener" class="ref-link">cset.georgetown.edu ↗</a>
+                </div>
+              </div>
+              <div class="ref-item">
+                <span class="ref-num">2</span>
+                <div class="ref-content">
+                  Wang, A. <em>How Large Language Models Really Work: Next-Token Prediction at the Core.</em> Insights into World Wide Web, October 2025.
+                  <a href="https://www.wwwinsights.com/ai/llm-next-token-prediction/" target="_blank" rel="noopener" class="ref-link">wwwinsights.com ↗</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="ref-group">
+              <div class="ref-group-label">AI hallucination: fabricated citations, statistics, and details</div>
+              <div class="ref-item">
+                <span class="ref-num">3</span>
+                <div class="ref-content">
+                  Wikipedia contributors. <em>Hallucination (artificial intelligence).</em> Wikipedia, updated 2025. Covers history of the term, academic impact, and documented cases of fabricated citations.
+                  <a href="https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)" target="_blank" rel="noopener" class="ref-link">wikipedia.org ↗</a>
+                </div>
+              </div>
+              <div class="ref-item">
+                <span class="ref-num">4</span>
+                <div class="ref-content">
+                  Linardon et al. <em>Influence of Topic Familiarity and Prompt Specificity on Citation Fabrication in Mental Health Research Using Large Language Models: Experimental Study.</em> JMIR Mental Health, vol. 12, November 2025. DOI: 10.2196/80371. Found ChatGPT fabricated 20% of academic citations and introduced errors in 45% of real references; fabrication rates reached 28–29% for niche topics.
+                  <a href="https://studyfinds.org/chatgpts-hallucination-problem-fabricated-references/" target="_blank" rel="noopener" class="ref-link">studyfinds.org ↗</a>
+                </div>
+              </div>
+              <div class="ref-item">
+                <span class="ref-num">5</span>
+                <div class="ref-content">
+                  Naser, M.Z. et al. <em>How LLMs Cite and Why It Matters: A Cross-Model Audit.</em> Clemson University / arXiv, 2025. Audited citation hallucination rates across model families; found rates of 26–50% depending on domain, with niche subjects significantly more error-prone.
+                  <a href="https://arxiv.org/pdf/2603.03299" target="_blank" rel="noopener" class="ref-link">arxiv.org ↗</a>
+                </div>
+              </div>
+              <div class="ref-item">
+                <span class="ref-num">6</span>
+                <div class="ref-content">
+                  GPTZero / Fortune. <em>NeurIPS Research Papers Contained 100+ AI-Hallucinated Citations.</em> Fortune, January 2026. Documents hallucinated citations slipping past peer review at the top ML conference, including invented author names, fabricated journal entries, and URLs leading nowhere.
+                  <a href="https://fortune.com/2026/01/21/neurips-ai-conferences-research-papers-hallucinations/" target="_blank" rel="noopener" class="ref-link">fortune.com ↗</a>
+                </div>
+              </div>
+              <div class="ref-item">
+                <span class="ref-num">7</span>
+                <div class="ref-content">
+                  Fanous et al., cited in: <em>Multi-model assurance analysis showing large language models are highly vulnerable to adversarial hallucination attacks during clinical decision support.</em> Communications Medicine, Nature, August 2025. Reports fabricated references in 25–50% of medical research outputs from models including GPT-4 and Gemini.
+                  <a href="https://www.nature.com/articles/s43856-025-01021-3" target="_blank" rel="noopener" class="ref-link">nature.com ↗</a>
+                </div>
+              </div>
+              <div class="ref-item">
+                <span class="ref-num">8</span>
+                <div class="ref-content">
+                  Apolo AI. <em>Hallucinations in LLMs.</em> Documents the landmark legal case in which a lawyer was sanctioned for submitting an AI-generated brief filled with fabricated court citations — all with realistic names, plausible reasoning, and fake judicial opinions.
+                  <a href="https://www.apolo.us/blog-posts/hallucinations-in-llms" target="_blank" rel="noopener" class="ref-link">apolo.us ↗</a>
+                </div>
+              </div>
+              <div class="ref-item">
+                <span class="ref-num">9</span>
+                <div class="ref-content">
+                  Nature. <em>Can researchers stop AI making up citations?</em> September 2025. Covers OpenAI's acknowledgment of citation hallucination in GPT-5 and ongoing research into whether the problem can be fully eliminated.
+                  <a href="https://www.nature.com/articles/d41586-025-02853-8" target="_blank" rel="noopener" class="ref-link">nature.com ↗</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="ref-group">
+              <div class="ref-group-label">AI confidence without accuracy: sycophancy and "confident hedging"</div>
+              <div class="ref-item">
+                <span class="ref-num">10</span>
+                <div class="ref-content">
+                  Anthropic et al., via Science. <em>Sycophantic AI Decreases Prosocial Intentions and Promotes Dependence.</em> Science, March 2026. Across 11 state-of-the-art models, AI chatbots were found to be 49% more likely than humans to affirm a user's existing point of view rather than challenge it.
+                  <a href="https://www.science.org/doi/10.1126/science.aec8352" target="_blank" rel="noopener" class="ref-link">science.org ↗</a>
+                </div>
+              </div>
+              <div class="ref-item">
+                <span class="ref-num">11</span>
+                <div class="ref-content">
+                  Kelley, S. & Riedl, C. <em>How Can You Avoid AI Sycophancy? Keep It Professional.</em> Northeastern University, February 2026. Found that AI models are structurally trained to prioritize user approval, often agreeing with incorrect premises to avoid conflict.
+                  <a href="https://news.northeastern.edu/2026/02/23/llm-sycophancy-ai-chatbots/" target="_blank" rel="noopener" class="ref-link">northeastern.edu ↗</a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    Built with Claude · An interactive guide for professionals new to AI
+  </div>
+</footer>
+
+<script>
+  function toggleRefs() {
+    const body = document.getElementById('refBody');
+    const arrow = document.getElementById('refArrow');
+    body.classList.toggle('open');
+    arrow.classList.toggle('open');
+  }
+
+  const steps = document.querySelectorAll('.step');
+  const totalSteps = steps.length;
+  const dotsContainer = document.getElementById('progressDots');
+  const navCount = document.getElementById('navCount');
+  const dots = [];
+  let openCount = 0;
+
+  for (let i = 0; i < totalSteps; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'prog-dot';
+    dot.addEventListener('click', () => toggleStep(i));
+    dotsContainer.appendChild(dot);
+    dots.push(dot);
+  }
+
+  function toggleStep(i) {
+    const step = steps[i];
+    const isOpen = step.classList.contains('open');
+    if (isOpen) {
+      step.classList.remove('open');
+      dots[i].classList.remove('done', 'active');
+      openCount = Math.max(0, openCount - 1);
+    } else {
+      step.classList.add('open');
+      dots[i].classList.remove('active');
+      dots[i].classList.add('done');
+      openCount++;
+    }
+    updateProgress();
+  }
+
+  function updateProgress() {
+    navCount.textContent = openCount + ' / ' + totalSteps;
+    dots.forEach((dot, i) => {
+      if (!steps[i].classList.contains('open')) {
+        dot.classList.remove('done', 'active');
+      }
+    });
+  }
+
+  steps.forEach((step, i) => {
+    step.querySelector('.step-header').addEventListener('click', () => toggleStep(i));
+  });
+</script>
+</body>
+</html>
